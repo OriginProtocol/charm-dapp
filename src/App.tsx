@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import DecimalFormat from 'decimal-format';
 import abi from './abi.json';
 import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
-import { ConnectButton, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { ConnectButton, useActiveAccount, useActiveWalletChain, useSendTransaction, useSwitchActiveWalletChain } from "thirdweb/react";
 import { ethereum, arbitrum, mainnet } from "thirdweb/chains";
 import { getWalletBalance } from "thirdweb/wallets";
 import { BigNumber, ethers } from "ethers";
@@ -11,7 +11,6 @@ import { getTradeRate } from "./utils";
 import { ARBITRUM_CONTRACT_ADDRESS, ETHEREUM_CONTRACT_ADDRESS, ETH_ADDRESS } from "./constants";
 
 export function App() {
-	const provider = new ethers.providers.Web3Provider(window.ethereum);
 	const account = useActiveAccount();
 
 	const [ethereumContractBalance, setEthereumContractBalance] = useState<string>("0");
@@ -20,13 +19,15 @@ export function App() {
 
 	const [ethereumWalletBalance, setEthereumWalletBalance] = useState<string>("0");
 	const [arbitrumWalletBalance, setArbitrumWalletBalance] = useState<string>("0");
-
+    const [pendingEthClaims, setPendingEthClaims] = useState<number>(0);
+    const [pendingArbClaims, setPendingArbClaims] = useState<number>(0);
   const [inputValue, setInputValue] = useState<string>("");
   const [outputValue, setOutputValue] = useState<string>("");
 
   const [exchangeRate, setExchangeRate] = useState(null);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const switchChain = useSwitchActiveWalletChain();
 
 	function handleInput(e) {
 		setInputValue(e.target.value);
@@ -169,11 +170,60 @@ export function App() {
 
 
   // Set up event listener for network changes
-  provider.on("network", (newNetwork, oldNetwork) => {
-	if (oldNetwork) {
-	  handleNetworkChange(newNetwork);
+//   provider.on("network", (newNetwork, oldNetwork) => {
+// 	if (oldNetwork) {
+// 	  handleNetworkChange(newNetwork);
+// 	}
+//   });
+
+
+  useEffect(() => {
+	fetchPendingClaims();
+}, []);
+
+const fetchPendingClaims = async () => {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	const network = await provider.getNetwork();
+	const contractAddress = network.chainId === 1 ? ETHEREUM_CONTRACT_ADDRESS : ARBITRUM_CONTRACT_ADDRESS;
+	const contract = new ethers.Contract(contractAddress, abi, provider);
+
+	try {
+		const ethClaims = await contract.pendingUserBalance(account?.address);
+		const arbClaims = await contract.pendingUserBalance(account?.address);
+		setPendingEthClaims(ethClaims.toNumber());
+		setPendingArbClaims(arbClaims.toNumber());
+	} catch (error) {
+		console.error("Error fetching pending claims:", error);
 	}
+};
+const handleClaim = async () => {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+  	const network = await provider.getNetwork();
+	const contractAddress=network.chainId == 1 ? ETHEREUM_CONTRACT_ADDRESS : ARBITRUM_CONTRACT_ADDRESS;
+	const chain=network.chainId == 1 ? mainnet : arbitrum;
+	const contract = getContract({
+	  client,
+	  address: contractAddress,
+	  chain,
+	  abi
   });
+
+	try {
+		const transaction = prepareContractCall({
+			contract,
+			method: "function claimPendingBalance()",
+			params: [],
+		});
+		const { transactionHash } = await sendTransaction({
+		  account,
+		  transaction,
+		});
+		fetchPendingClaims();
+		alert("Transaction sent: " + transactionHash);
+	} catch (error) {
+		console.error("Error claiming tokens:", error);
+	}
+};
 
   const df = new DecimalFormat('#,##0.000');
 
@@ -226,6 +276,35 @@ export function App() {
 				  		<p><strong>{df.format(arbitrumContractBalance)} ETH</strong></p>
 				  	</div>
 				  </div>
+				  <div>
+                    <h2>Pending Claims</h2>
+                    <div>
+                        <h3>ETH</h3>
+                        {pendingEthClaims > 0 ? (
+                            <button onClick={async () => {
+								let provider = new ethers.providers.Web3Provider(window.ethereum);
+								const network = await provider.getNetwork();
+								if(network.chainId!=1) switchChain(mainnet)
+								handleClaim()
+							}}>Claim {pendingEthClaims} ETH</button>
+                        ) : (
+                            <p>No pending claims for ETH on Mainnet</p>
+                        )}
+                    </div>
+                    <div>
+                        <h3>ARB</h3>
+						{pendingArbClaims > 0 ? (
+                            <button onClick={async () => {
+								let provider = new ethers.providers.Web3Provider(window.ethereum);
+								const network = await provider.getNetwork();
+								if(network.chainId!=42161) switchChain(arbitrum)
+								handleClaim()
+							}}>Claim {pendingArbClaims} ETH</button>
+                        ) : (
+                            <p>No pending claims for ETH on Arbitrum</p>
+                        )}
+                    </div>
+                </div>
 			  </div>
 			</div>
 		</main>
