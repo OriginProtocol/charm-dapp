@@ -1,34 +1,22 @@
 import { useEffect, useState } from "react";
 import DecimalFormat from 'decimal-format';
 import abi from './abi.json';
-import { getContract, prepareTransaction } from "thirdweb";
-import { ConnectButton, useActiveAccount, useReadContract, useSendTransaction } from "thirdweb/react";
-import { ethereum, arbitrum } from "thirdweb/chains";
-import { toWei } from "thirdweb/utils";
+import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import { ConnectButton, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { ethereum, arbitrum, mainnet } from "thirdweb/chains";
 import { getWalletBalance } from "thirdweb/wallets";
 import { BigNumber, ethers } from "ethers";
 import { client } from "./client";
-
-const ETHEREUM_CONTRACT_ADDRESS: string = "0xd2ce34cc70ffdc707934bd0035fc1b4450936d63";
-const ARBITRUM_CONTRACT_ADDRESS: string = "0xa6774B8A0C61e724BDA845b22b0ACB42c4f5c100";
-const ETH_ADDRESS: string = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+import { getTradeRate } from "./utils";
+import { ARBITRUM_CONTRACT_ADDRESS, ETHEREUM_CONTRACT_ADDRESS, ETH_ADDRESS } from "./constants";
 
 export function App() {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
 	const account = useActiveAccount();
-
-	const ethereumContract = getContract({
-		address: ETHEREUM_CONTRACT_ADDRESS,
-		chain: ethereum,
-		abi
-	});
-	const arbitrumContract = getContract({
-		address: ARBITRUM_CONTRACT_ADDRESS,
-		chain: arbitrum,
-		abi
-	});
 
 	const [ethereumContractBalance, setEthereumContractBalance] = useState<string>("0");
 	const [arbitrumContractBalance, setArbitrumContractBalance] = useState<string>("0");
+	const [tradeRate, setTradeRate] = useState<any>(null);
 
 	const [ethereumWalletBalance, setEthereumWalletBalance] = useState<string>("0");
 	const [arbitrumWalletBalance, setArbitrumWalletBalance] = useState<string>("0");
@@ -39,18 +27,6 @@ export function App() {
   const [exchangeRate, setExchangeRate] = useState(null);
 
   const [loading, setLoading] = useState<boolean>(false);
-
-  const { mutate, data } = useSendTransaction();
-
-  // to-do: figure out why traderate is returning undefined
-  // 
-  // const { data: traderate } = useReadContract({
-  //   contract: arbitrumContract,
-  //   method: "traderate"
-  // });
-
-  // to-do: remove hard-coded traderate
-  const traderate = "980000000000000000";
 
 	function handleInput(e) {
 		setInputValue(e.target.value);
@@ -63,11 +39,6 @@ export function App() {
 	const handleSwap = async e => {
     e.preventDefault();
 
-    if (!arbitrumContract) {
-      console.error("Arbitrum contract not loaded");
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -75,16 +46,32 @@ export function App() {
       const amountOutMin = ethers.utils.parseUnits(outputValue, 18);
       const inToken = ETH_ADDRESS;
       const outToken = ETH_ADDRESS;
-      const functionName = "swapExactTokensForTokens";
-
+	  const network = await provider.getNetwork();
+      const contractAddress=network.chainId == 1 ? ETHEREUM_CONTRACT_ADDRESS : ARBITRUM_CONTRACT_ADDRESS;
+	  const chain=network.chainId == 1 ? mainnet : arbitrum;
+	  const contract = getContract({
+		client,
+		address: contractAddress,
+		chain,
+		abi
+	});
+	  const transaction = prepareContractCall({
+		  contract,
+		  method: "function swapExactTokensForTokens(address inToken, address outToken, uint256 amountIn, uint256 amountOutMin, address to)",
+		  params: [inToken, outToken, amountIn, amountOutMin, account?.address],
+		  value: amountIn
+	  });
+	  const { transactionHash } = await sendTransaction({
+		account,
+		transaction,
+	  });
       // to-do: submit the transaction
 
-			mutate(tx);
+	  //mutate(tx);
 
-      alert('Transaction successful');
-      console.log(tx);
+      alert('Transaction sent : ' + transactionHash);
     } catch (err) {
-      alert('Error calling exactTokensForTokens');
+     // alert('Error calling swap');
       console.error(err);
     } finally {
       setLoading(false);
@@ -141,17 +128,27 @@ export function App() {
 
   fetchContractBalances();
 
-  useEffect(() => {
-    if (traderate) {
-      setExchangeRate(traderate);
-    }
-  }, [traderate]);
 
   useEffect(() => {
   	account && fetchAccountBalances();
 
     setInterval(fetchContractBalances, 60000);
   }, [account]);
+
+  useEffect(() => {
+    const fetchTradeRate = async () => {
+      try {
+        const rate = await getTradeRate();
+        setTradeRate(rate);
+		setExchangeRate(rate);
+        console.log("Data:", rate);
+      } catch (error) {
+        console.error("Failed to fetch trade rate:", error);
+      }
+    };
+
+    fetchTradeRate();
+  }, [tradeRate]);
 
   useEffect(() => {
   	if (inputValue && exchangeRate) {
@@ -164,6 +161,19 @@ export function App() {
   		setOutputValue('');
   	}
   }, [inputValue, exchangeRate]);
+
+  const handleNetworkChange = async (newNetwork: ethers.providers.Network) => {
+	console.log("Network switched to:", newNetwork.chainId);
+	
+  };
+
+
+  // Set up event listener for network changes
+  provider.on("network", (newNetwork, oldNetwork) => {
+	if (oldNetwork) {
+	  handleNetworkChange(newNetwork);
+	}
+  });
 
   const df = new DecimalFormat('#,##0.000');
 
@@ -233,7 +243,7 @@ function Navbar() {
 					name: "Charm",
 					url: "https://ipfs.io",
 				}}
-			/>
+			/> 
 		</nav>
 	);
 }
