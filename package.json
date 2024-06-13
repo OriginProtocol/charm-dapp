@@ -9,6 +9,8 @@
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
 	},
 	"dependencies": {
+		"decimal-format": "^3.0.1",
+		"ethers": "5",
 		"react": "^18.3",
 		"react-dom": "^18.3",
 		"thirdweb": "^5"

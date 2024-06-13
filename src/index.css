@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,4 +21,73 @@
   body {
     @apply bg-zinc-950 text-neutral-200;
   }
+}
+
+#logo {
+  font-family: "Sriracha", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 3rem;
+}
+
+h3 {
+  font-weight: 300;
+}
+
+.sparkle {
+  font-size: 2rem;
+}
+
+.translucent {
+  opacity: 0.66;
+}
+
+form input[type="number"] {
+  background: transparent;
+  border: none;
+  font-size: 36px;
+  -moz-appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input::placeholder {
+  color: grey;
+}
+
+form, .contracts {
+  max-width: 610px;
+  width: 100%;
+}
+
+.rounded {
+  border-radius: 16px;
+}
+
+.symbol {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.input-container {
+  border-radius: 16px;
+  background: #010101;
+  height: 100px;
+}
+
+.input-container img {
+  height: 36px;
+}
+
+.max {
+  cursor: pointer;
+}
+
+.card {
+  border: 1px solid rgb(256, 256, 256, 0.333);
+  border-radius: 4px;
 }
