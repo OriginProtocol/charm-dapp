@@ -59,6 +59,7 @@ export function App() {
       const amountOutMin = ethers.utils.parseUnits(outputValue, 18);
       const inToken = ETH_ADDRESS;
       const outToken = ETH_ADDRESS;
+	  const provider = new ethers.providers.Web3Provider(window.ethereum);
       const network = await provider.getNetwork();
       const contractAddress =
         network.chainId == 1
