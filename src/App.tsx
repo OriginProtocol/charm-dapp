@@ -229,85 +229,95 @@ const handleClaim = async () => {
 
 	return (
 		<main className="p-4 container max-w-screen-lg mx-auto">
-			<Navbar />
-			<div className="py-20">
-				<div className="flex justify-center mb-10 flex-col">
-				  <form className="rounded px-8 pt-6 pb-8 mb-4 mx-auto" onSubmit={handleSwap}>
-				    <div className="mb-4 input-container px-4 flex items-center">
-				      <input
-				        type="number"
-				        placeholder="0"
-				        value={inputValue}
-				        onChange={handleInput}
-				        fontFamily="monospace"
-				        className="appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none"
-				      />
-				      <div className="max-container w-12 mr-2">
-				      	{arbitrumWalletBalance !== '0' && arbitrumWalletBalance !== inputValue &&
-				      		<a className="max text-yellow-400" onClick={handleMax}>Max</a>
-				      	}
-				      </div>
-				      <img src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/arbitrum/512.png" />
-				      <div className="symbol pl-2">ETH</div>
-				    </div>
-				    <div className="mb-6 input-container px-4 flex items-center">
-				      <input
-				      	disabled
-				        type="number"
-				        placeholder="0"
-				        value={outputValue}
-				        fontFamily="monospace"
-				        className="appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none"
-				      />
-				      <img src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/ethereum/512.png" />
-				      <div className="symbol pl-2">ETH</div>
-				    </div>
-			      <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-4 rounded focus:outline-none w-full" type="submit">
-			        Swap
-			      </button>
-				  </form>
-					<div className="contracts flex justify-center mb-20 px-8 mx-auto">
-				  	<div className="card p-4 mr-2 flex-grow text-center">
-				  		<h3>Ethereum liquidity</h3>
-				  		<p><strong>{df.format(ethereumContractBalance)} ETH</strong></p>
-				  	</div>
-				  	<div className="card p-4 flex-grow text-center">
-				  		<h3>Arbitrum liquidity</h3>
-				  		<p><strong>{df.format(arbitrumContractBalance)} ETH</strong></p>
-				  	</div>
-				  </div>
-				  <div>
-                    <h2>Pending Claims</h2>
-                    <div>
-                        <h3>ETH</h3>
-                        {pendingEthClaims > 0 ? (
-                            <button onClick={async () => {
-								let provider = new ethers.providers.Web3Provider(window.ethereum);
-								const network = await provider.getNetwork();
-								if(network.chainId!=1) switchChain(mainnet)
-								handleClaim()
-							}}>Claim {pendingEthClaims} ETH</button>
-                        ) : (
-                            <p>No pending claims for ETH on Mainnet</p>
-                        )}
+    <Navbar />
+    <div className="py-20">
+        <div className="flex justify-center mb-10 flex-col">
+            <form className="rounded px-8 pt-6 pb-8 mb-4 mx-auto" onSubmit={handleSwap}>
+                <div className="mb-4 input-container px-4 flex items-center">
+                    <input
+                        type="number"
+                        placeholder="0"
+                        value={inputValue}
+                        onChange={handleInput}
+                        fontFamily="monospace"
+                        className="appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none"
+                    />
+                    <div className="max-container w-12 mr-2">
+                        {arbitrumWalletBalance !== '0' && arbitrumWalletBalance !== inputValue &&
+                            <a className="max text-yellow-400" onClick={handleMax}>Max</a>
+                        }
                     </div>
-                    <div>
-                        <h3>ARB</h3>
-						{pendingArbClaims > 0 ? (
-                            <button onClick={async () => {
-								let provider = new ethers.providers.Web3Provider(window.ethereum);
-								const network = await provider.getNetwork();
-								if(network.chainId!=42161) switchChain(arbitrum)
-								handleClaim()
-							}}>Claim {pendingArbClaims} ETH</button>
-                        ) : (
-                            <p>No pending claims for ETH on Arbitrum</p>
-                        )}
-                    </div>
+                    <img src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/arbitrum/512.png" />
+                    <div className="symbol pl-2">ETH</div>
                 </div>
-			  </div>
-			</div>
-		</main>
+                <div className="mb-6 input-container px-4 flex items-center">
+                    <input
+                        disabled
+                        type="number"
+                        placeholder="0"
+                        value={outputValue}
+                        fontFamily="monospace"
+                        className="appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none"
+                    />
+                    <img src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/ethereum/512.png" />
+                    <div className="symbol pl-2">ETH</div>
+                </div>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-4 rounded focus:outline-none w-full" type="submit">
+                    Swap
+                </button>
+            </form>
+            <div className="contracts flex justify-center mb-20 px-8 mx-auto">
+                <div className="card p-4 mr-2 flex-grow text-center">
+                    <h3>Ethereum liquidity</h3>
+                    <p><strong>{df.format(ethereumContractBalance)} ETH</strong></p>
+                </div>
+                <div className="card p-4 flex-grow text-center">
+                    <h3>Arbitrum liquidity</h3>
+                    <p><strong>{df.format(arbitrumContractBalance)} ETH</strong></p>
+                </div>
+            </div>
+            <div className="pending-claims flex justify-center mb-20 px-8 mx-auto">
+                <div className="card p-4 mr-2 flex-grow text-center">
+                    <h3>Pending Claims (ETH)</h3>
+                    {pendingEthClaims > 0 ? (
+                        <button
+                            className="bg-green-500 hover:bg-green-700 text-white font-bold p-2 rounded focus:outline-none mt-4"
+                            onClick={async () => {
+                                let provider = new ethers.providers.Web3Provider(window.ethereum);
+                                const network = await provider.getNetwork();
+                                if (network.chainId != 1) switchChain(mainnet);
+                                handleClaim();
+                            }}
+                        >
+                            Claim {pendingEthClaims} ETH
+                        </button>
+                    ) : (
+                        <p>No pending claims for ETH on Mainnet</p>
+                    )}
+                </div>
+                <div className="card p-4 flex-grow text-center">
+                    <h3>Pending Claims (ARB)</h3>
+                    {pendingArbClaims > 0 ? (
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded focus:outline-none mt-4"
+                            onClick={async () => {
+                                let provider = new ethers.providers.Web3Provider(window.ethereum);
+                                const network = await provider.getNetwork();
+                                if (network.chainId != 42161) switchChain(arbitrum);
+                                handleClaim();
+                            }}
+                        >
+                            Claim {pendingArbClaims} ARB
+                        </button>
+                    ) : (
+                        <p>No pending claims for ETH on Arbitrum</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
 	);
 }
 
