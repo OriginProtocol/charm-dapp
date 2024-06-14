@@ -4,9 +4,10 @@
 	"version": "0.0.0",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "vite build",
 		"preview": "vite preview",
-		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+		"deploy": "yarn build && npx thirdweb@latest upload dist"
 	},
 	"dependencies": {
 		"decimal-format": "^3.0.1",

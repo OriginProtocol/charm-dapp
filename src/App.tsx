@@ -263,7 +263,7 @@ export function App() {
                     </a>
                   )}
               </div>
-              <img src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/arbitrum/512.png" />
+              <img src="/arbitrum.png" />
               <div className="symbol pl-2">ETH</div>
             </div>
             <div className="mb-6 input-container px-4 flex items-center">
@@ -275,7 +275,7 @@ export function App() {
                 fontFamily="monospace"
                 className="appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none"
               />
-              <img src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/ethereum/512.png" />
+              <img src="/ethereum.png" />
               <div className="symbol pl-2">ETH</div>
             </div>
             <button
@@ -305,7 +305,7 @@ export function App() {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
                   <img
-                    src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/arbitrum/512.png"
+                    src="/arbitrum.png"
                     className="w-6 h-6 mr-2"
                   />
                   <span>Arbitrum ETH:</span>
@@ -331,7 +331,7 @@ export function App() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <img
-                    src="https://efa358f60d03e391c09a04028291ee65.ipfscdn.io/ipfs/QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/ethereum/512.png"
+                    src="/ethereum.png"
                     className="w-6 h-6 mr-2"
                   />
                   <span>Mainnet ETH:</span>
